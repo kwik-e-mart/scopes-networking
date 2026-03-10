@@ -4,9 +4,11 @@ source "$SERVICE_PATH/utils/log"
 
 log info "🔍 Validating ALB configuration..."
 
-# Skip ALB entirely for event-driven scopes (no HTTP networking needed).
 # Use $VISIBILITY set by build_context — it accounts for http_enabled=false.
 visibility="${VISIBILITY:-public}"
+log info "   📋 VISIBILITY env var: '${VISIBILITY}' → resolved visibility: '$visibility'"
+
+# Skip ALB entirely for event-driven scopes (no HTTP networking needed).
 if [ "$visibility" = "event-driven" ]; then
   log info "   ⏭️  Skipping ALB - visibility is 'event-driven' (no HTTP networking)"
   return 0

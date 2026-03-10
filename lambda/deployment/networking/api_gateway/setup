@@ -4,10 +4,11 @@ source "$SERVICE_PATH/utils/log"
 
 log info "🔍 Validating API Gateway configuration..."
 
-# Check visibility - API Gateway is only for public scopes.
 # Use $VISIBILITY set by build_context — it accounts for http_enabled=false.
 visibility="${VISIBILITY:-public}"
+log info "   📋 VISIBILITY env var: '${VISIBILITY}' → resolved visibility: '$visibility'"
 
+# Check visibility - API Gateway is only for public scopes.
 if [ "$visibility" != "public" ]; then
   echo ""
   log info "   ⏭️  Skipping API Gateway - visibility is '$visibility' (not public)"

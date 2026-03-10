@@ -8,6 +8,7 @@ log info "🔍 Validating Route53 DNS configuration..."
 # For private/internal scopes, prefer hosted_zone_id if available; fall back to public zone.
 # Use $VISIBILITY set by build_context — it accounts for http_enabled=false.
 visibility="${VISIBILITY:-public}"
+log info "   📋 VISIBILITY env var: '${VISIBILITY}' → resolved visibility: '$visibility'"
 
 # Skip DNS entirely for event-driven scopes (no HTTP networking needed)
 if [ "$visibility" = "event-driven" ]; then
