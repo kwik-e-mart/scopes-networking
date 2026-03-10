@@ -59,12 +59,22 @@ target_group_name="${scope_id}-${app_slug_nodash:0:9}-${scope_slug_nodash:0:9}"
 target_group_name="${target_group_name:0:32}"
 log debug "   ✅ target_group_name=$target_group_name"
 
-# Host header for routing
-# Prefer dns_full_domain from TOFU_VARIABLES (set by setup_dns which runs first in this workflow).
-# Fall back to scope.domain from context (set on previous deployments), then a generated pattern.
-host_header=$(echo "$TOFU_VARIABLES" | jq -r '.dns_full_domain // empty')
+# Host header for routing.
+# Preference order:
+# 1. $DNS_FULL_DOMAIN env var — set by setup_dns when it runs before this step
+# 2. dns_full_domain in TOFU_VARIABLES — same source, available in re-deployments
+# 3. scope.domain from context — set on previous deployments (reject platform placeholders)
+# 4. Generated pattern — last resort
+host_header="${DNS_FULL_DOMAIN:-}"
+if [ -z "$host_header" ]; then
+  host_header=$(echo "$TOFU_VARIABLES" | jq -r '.dns_full_domain // empty')
+fi
 if [ -z "$host_header" ] || [ "$host_header" = "null" ]; then
   host_header=$(echo "$CONTEXT" | jq -r '.scope.domain // empty')
+  # Reject platform placeholder values (contain spaces, e.g. "To be defined")
+  if [[ "$host_header" =~ [[:space:]] ]]; then
+    host_header=""
+  fi
 fi
 if [ -z "$host_header" ] || [ "$host_header" = "null" ]; then
   host_header="${namespace_slug}-${application_slug}-${scope_slug}.internal"

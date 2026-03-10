@@ -114,6 +114,9 @@ log debug "   ✅ subdomain=$network_subdomain"
 scope_domain="${network_subdomain}.${network_domain}"
 log debug "   ✅ full_domain=$scope_domain"
 
+DNS_FULL_DOMAIN="$scope_domain"
+export DNS_FULL_DOMAIN
+
 TOFU_VARIABLES=$(echo "$TOFU_VARIABLES" | jq \
   --arg hosted_zone_id "$hosted_zone_id" \
   --arg domain "$network_domain" \
@@ -161,19 +164,13 @@ echo ""
 # Add module to composition list
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Route53 modules reference api_gateway_* and alb_* locals that must always be declared.
-# Add stubs if the corresponding modules were not composed (e.g. setup_api_gateway or
-# setup_alb was skipped or not present in the current workflow).
+# Route53 modules reference api_gateway_* locals that must always be declared.
+# Add stubs if the api_gateway module was not composed (e.g. setup_api_gateway is
+# absent from the current workflow, as in scope/create).
 if ! echo "${MODULES_TO_USE:-}" | grep -q "api_gateway"; then
   log debug "   📋 API Gateway module not in composition — adding stubs_no_api_gateway"
   apigw_stubs="${script_dir}/stubs_no_api_gateway"
   MODULES_TO_USE="${MODULES_TO_USE:+$MODULES_TO_USE,}${apigw_stubs}"
-fi
-
-if ! echo "${MODULES_TO_USE:-}" | grep -q "networking/alb"; then
-  log debug "   📋 ALB module not in composition — adding stubs_no_alb"
-  alb_stubs="${script_dir}/stubs_no_alb"
-  MODULES_TO_USE="${MODULES_TO_USE:+$MODULES_TO_USE,}${alb_stubs}"
 fi
 
 module_name="${script_dir}/modules"
