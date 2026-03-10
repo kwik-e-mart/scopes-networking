@@ -160,8 +160,23 @@ echo ""
 
 # Add module to composition list
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-module_name="${script_dir}/modules"
 
+# Route53 modules reference api_gateway_* and alb_* locals that must always be declared.
+# Add stubs if the corresponding modules were not composed (e.g. setup_api_gateway or
+# setup_alb was skipped or not present in the current workflow).
+if ! echo "${MODULES_TO_USE:-}" | grep -q "api_gateway"; then
+  log debug "   📋 API Gateway module not in composition — adding stubs_no_api_gateway"
+  apigw_stubs="${script_dir}/stubs_no_api_gateway"
+  MODULES_TO_USE="${MODULES_TO_USE:+$MODULES_TO_USE,}${apigw_stubs}"
+fi
+
+if ! echo "${MODULES_TO_USE:-}" | grep -q "networking/alb"; then
+  log debug "   📋 ALB module not in composition — adding stubs_no_alb"
+  alb_stubs="${script_dir}/stubs_no_alb"
+  MODULES_TO_USE="${MODULES_TO_USE:+$MODULES_TO_USE,}${alb_stubs}"
+fi
+
+module_name="${script_dir}/modules"
 if [[ -n $MODULES_TO_USE ]]; then
   MODULES_TO_USE="$MODULES_TO_USE,$module_name"
 else
