@@ -60,7 +60,7 @@ target_group_name="${target_group_name:0:32}"
 log debug "   ✅ target_group_name=$target_group_name"
 
 # Host header for routing
-# Prefer dns_full_domain from TOFU_VARIABLES (set by setup_dns which runs before setup_networking).
+# Prefer dns_full_domain from TOFU_VARIABLES (set by setup_dns which runs first in this workflow).
 # Fall back to scope.domain from context (set on previous deployments), then a generated pattern.
 host_header=$(echo "$TOFU_VARIABLES" | jq -r '.dns_full_domain // empty')
 if [ -z "$host_header" ] || [ "$host_header" = "null" ]; then

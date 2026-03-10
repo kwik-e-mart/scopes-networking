@@ -3,6 +3,14 @@ steps:
     type: workflow
     before: compose_modules
     steps:
+      - name: setup_dns
+        type: script
+        file: "$OVERRIDES_PATH/deployment/dns/route53/setup"
+        output:
+          - name: TOFU_VARIABLES
+            type: environment
+          - name: MODULES_TO_USE
+            type: environment
       - name: setup_alb
         type: script
         file: "$OVERRIDES_PATH/deployment/networking/alb/setup"
@@ -12,12 +20,4 @@ steps:
           - name: MODULES_TO_USE
             type: environment
           - name: ALB_RULE_PRIORITY
-            type: environment
-      - name: setup_dns
-        type: script
-        file: "$OVERRIDES_PATH/deployment/dns/route53/setup"
-        output:
-          - name: TOFU_VARIABLES
-            type: environment
-          - name: MODULES_TO_USE
             type: environment
