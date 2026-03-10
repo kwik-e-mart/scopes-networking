@@ -4,8 +4,9 @@ source "$SERVICE_PATH/utils/log"
 
 log info "🔍 Validating API Gateway configuration..."
 
-# Check visibility - API Gateway is only for public scopes
-visibility=$(echo "$CONTEXT" | jq -r '.scope.capabilities.visibility // "public"')
+# Check visibility - API Gateway is only for public scopes.
+# Use $VISIBILITY set by build_context — it accounts for http_enabled=false.
+visibility="${VISIBILITY:-public}"
 
 if [ "$visibility" != "public" ]; then
   echo ""
