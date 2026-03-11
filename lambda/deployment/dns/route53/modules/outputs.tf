@@ -5,7 +5,7 @@ output "dns_record_name" {
 
 output "dns_record_type" {
   description = "The type of DNS record created"
-  value       = local.dns_use_api_gateway ? "A (alias)" : "CNAME"
+  value       = local.dns_alb_dns_name != "" ? "A (alias)" : "CNAME"
 }
 
 output "dns_hosted_zone_id" {
