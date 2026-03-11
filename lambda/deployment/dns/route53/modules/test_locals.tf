@@ -1,17 +1,17 @@
 # NOTE: Files matching test_*.tf are skipped by compose_modules
 # These variables simulate cross-module locals for isolated testing
 
-variable "test_api_gateway_target_domain" {
-  description = "Test-only: Simulates API Gateway module output"
+variable "test_alb_dns_name" {
+  description = "Test-only: Simulates ALB module output"
   default     = ""
 }
 
-variable "test_api_gateway_target_zone_id" {
-  description = "Test-only: Simulates API Gateway module output"
+variable "test_alb_zone_id" {
+  description = "Test-only: Simulates ALB module output"
   default     = ""
 }
 
 locals {
-  api_gateway_target_domain  = var.test_api_gateway_target_domain
-  api_gateway_target_zone_id = var.test_api_gateway_target_zone_id
+  alb_dns_name = var.test_alb_dns_name
+  alb_zone_id  = var.test_alb_zone_id
 }
