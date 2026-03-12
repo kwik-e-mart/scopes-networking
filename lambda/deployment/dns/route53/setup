@@ -17,16 +17,16 @@ if [ "$visibility" = "event-driven" ]; then
 fi
 
 if [ "$visibility" = "private" ] || [ "$visibility" = "internal" ]; then
-  hosted_zone_id=$(echo "$CONTEXT" | jq -r '.providers["cloud-providers"].networking.hosted_zone_id // empty')
+  hosted_zone_id="${HOSTED_PRIVATE_ZONE_ID:-}"
   if [ -n "$hosted_zone_id" ] && [ "$hosted_zone_id" != "null" ]; then
     log debug "   ✅ Using private hosted zone (visibility=$visibility)"
   else
     # Fall back to public zone if no private zone is configured
-    hosted_zone_id=$(echo "$CONTEXT" | jq -r '.providers["cloud-providers"].networking.hosted_public_zone_id // empty')
-    log warn "   ⚠️  No hosted_zone_id configured, falling back to public zone"
+    hosted_zone_id="${HOSTED_PUBLIC_ZONE_ID:-}"
+    log warn "   ⚠️  No HOSTED_PRIVATE_ZONE_ID configured, falling back to public zone"
   fi
 else
-  hosted_zone_id=$(echo "$CONTEXT" | jq -r '.providers["cloud-providers"].networking.hosted_public_zone_id // empty')
+  hosted_zone_id="${HOSTED_PUBLIC_ZONE_ID:-}"
 fi
 
 if [ -z "$hosted_zone_id" ] || [ "$hosted_zone_id" = "null" ]; then
@@ -34,8 +34,8 @@ if [ -z "$hosted_zone_id" ] || [ "$hosted_zone_id" = "null" ]; then
   echo "   ❌ No hosted zone ID configured" >&2
   echo "" >&2
   echo "  🔧 How to fix:" >&2
-  echo "    1. Ensure there is an AWS cloud-provider configured at the correct NRN hierarchy level" >&2
-  echo "    2. Set 'hosted_public_zone_id' (public scopes) or 'hosted_zone_id' (private/internal scopes)" >&2
+  echo "    1. Ensure there is a scope-configurations provider at the correct NRN hierarchy level" >&2
+  echo "    2. Set 'dns.hosted_public_zone_id' (public scopes) or 'dns.hosted_private_zone_id' (private/internal scopes)" >&2
   echo "" >&2
   return 1
 fi
